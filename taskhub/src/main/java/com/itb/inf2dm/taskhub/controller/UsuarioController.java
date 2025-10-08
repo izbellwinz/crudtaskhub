@@ -1,7 +1,6 @@
 package com.itb.inf2dm.taskhub.controller;
 
 
-import com.itb.inf2dm.taskhub.model.entity.Configuracao;
 import com.itb.inf2dm.taskhub.model.entity.Usuario;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,5 +20,6 @@ public class UsuarioController {
 
 
         return usuario;
+        //usuario
     }
 }
