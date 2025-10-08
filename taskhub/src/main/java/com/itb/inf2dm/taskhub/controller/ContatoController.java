@@ -28,8 +28,5 @@ public class ContatoController {
         contatos.add(c1);
 
         return contatos;
-
-        //tcc
-        //tcc2
     }
 }

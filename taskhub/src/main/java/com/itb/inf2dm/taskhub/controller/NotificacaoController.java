@@ -19,7 +19,6 @@ public class NotificacaoController {
     @GetMapping
     public List<Notificacao> findAll() {
 
-
         return notificacao;
     }
 }
