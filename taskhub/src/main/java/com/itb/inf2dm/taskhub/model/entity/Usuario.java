@@ -1,11 +1,7 @@
 package com.itb.inf2dm.taskhub.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
-import java.util.Base64;
 
 @Entity
 @Table(name = "Usuario")
@@ -13,55 +9,36 @@ public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;               // INT IDENTITY
+    private Long id;
 
-    @Column(name = "nome", length = 100, nullable = false)
+    @Column(name = "nome", nullable = false, length = 100)
     private String nome;
 
-    @Column(name = "email", length = 100, nullable = false, unique = true)
+    @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
 
-    @Column(name = "senha", length = 100, nullable = false)
+    @Column(name = "senha", nullable = false, length = 100)
     private String senha;
 
-    @Column(name = "nivelAcesso", length = 20, nullable = false)
+    @Column(name = "nivelAcesso", nullable = false, length = 20)
     private String nivelAcesso;
 
-    @Lob
-    @Column(name = "foto", columnDefinition = "varbinary(max)", nullable = true)
-    @JsonIgnore // não serializar o array de bytes cru
+    // Foto armazenada como bytes (campo varbinary no banco)
+    @Column(name = "foto")
     private byte[] foto;
 
     @Column(name = "dataCadastro", nullable = false)
     private LocalDateTime dataCadastro;
 
-    @Column(name = "statusUsuario", length = 20, nullable = false)
+    @Column(name = "statusUsuario", nullable = false, length = 20)
     private String statusUsuario;
 
-    public Usuario() {
-    }
-
-    @PrePersist
-    public void prePersist() {
-        if (this.dataCadastro == null) {
-            this.dataCadastro = LocalDateTime.now();
-        }
-        if (this.nivelAcesso == null) {
-            this.nivelAcesso = "USER"; // conforme combinado
-        }
-        if (this.statusUsuario == null) {
-            this.statusUsuario = "ATIVO";
-        }
-    }
-
-    // getters e setters
-
-    public Integer getId() {
+    // ----- Getters e Setters -----
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -119,22 +96,5 @@ public class Usuario {
 
     public void setStatusUsuario(String statusUsuario) {
         this.statusUsuario = statusUsuario;
-    }
-
-    // Para retornar a foto no JSON como base64 em vez do array de bytes cru
-    @JsonProperty("foto")
-    public String getFotoBase64() {
-        if (this.foto == null) return null;
-        return Base64.getEncoder().encodeToString(this.foto);
-    }
-
-    // opcional: permitir setar foto via base64 (não será usado automaticamente pelo Jackson sem customização)
-    @JsonProperty("foto")
-    public void setFotoBase64(String base64) {
-        if (base64 == null || base64.isBlank()) {
-            this.foto = null;
-        } else {
-            this.foto = Base64.getDecoder().decode(base64);
-        }
     }
 }

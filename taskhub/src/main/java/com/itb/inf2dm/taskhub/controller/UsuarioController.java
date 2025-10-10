@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/usuario")
 @CrossOrigin
+
 public class UsuarioController {
 
     @Autowired
@@ -38,7 +39,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> findById(@PathVariable Integer id) {
+    public ResponseEntity<Usuario> findById(@PathVariable Long id) {
         Usuario u = usuarioService.findById(id);
         return ResponseEntity.ok(u);
     }
@@ -60,7 +61,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> update(@PathVariable Integer id, @RequestBody UsuarioRequest req) {
+    public ResponseEntity<Usuario> update(@PathVariable Long id, @RequestBody UsuarioRequest req) {
         Usuario dados = new Usuario();
         dados.setNome(req.nome);
         dados.setEmail(req.email);
@@ -74,14 +75,14 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         usuarioService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     // Desativar (soft) — define statusUsuario = "INATIVO"
     @PostMapping("/{id}/desativar")
-    public ResponseEntity<Usuario> desativar(@PathVariable Integer id) {
+    public ResponseEntity<Usuario> desativar(@PathVariable Long id) {
         Usuario u = usuarioService.desativar(id);
         return ResponseEntity.ok(u);
     }

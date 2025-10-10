@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UsuarioServices {
@@ -13,65 +14,71 @@ public class UsuarioServices {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    // Listar todos os usuários
     public List<Usuario> findAll() {
         return usuarioRepository.findAll();
     }
 
-    public Usuario findById(Integer id) {
+    // Buscar usuário por ID
+    public Usuario findById(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o id " + id));
     }
 
+    // Criar novo usuário
     public Usuario save(Usuario usuario) {
-        // validação simples: email único
         if (usuario.getEmail() != null && usuarioRepository.existsByEmail(usuario.getEmail())) {
             throw new RuntimeException("Email já cadastrado: " + usuario.getEmail());
         }
-        // força nivelAcesso = USER
-        usuario.setNivelAcesso("USER");
-        // se status não informado, será tratado no @PrePersist
+
+        // Define valores padrão
+        if (usuario.getNivelAcesso() == null) {
+            usuario.setNivelAcesso("USER");
+        }
+        if (usuario.getStatusUsuario() == null) {
+            usuario.setStatusUsuario("ATIVO");
+        }
+
         return usuarioRepository.save(usuario);
     }
 
-    public Usuario update(Integer id, Usuario dados) {
+    // Atualizar usuário existente
+    public Usuario update(Long id, Usuario dados) {
         Usuario existente = findById(id);
-        // atualiza campos permitidos
+
         if (dados.getNome() != null) existente.setNome(dados.getNome());
         if (dados.getEmail() != null && !dados.getEmail().equals(existente.getEmail())) {
-            // evita duplicar e permite mudar se ainda não existir
             if (usuarioRepository.existsByEmail(dados.getEmail())) {
                 throw new RuntimeException("Email já cadastrado: " + dados.getEmail());
             }
             existente.setEmail(dados.getEmail());
         }
         if (dados.getSenha() != null) existente.setSenha(dados.getSenha());
-        // nivelAcesso sempre USER (conforme seu requisito)
-        existente.setNivelAcesso("USER");
         if (dados.getFoto() != null) existente.setFoto(dados.getFoto());
         if (dados.getStatusUsuario() != null) existente.setStatusUsuario(dados.getStatusUsuario());
-        // não altera dataCadastro
+
+        // Nível de acesso sempre USER (regra de negócio)
+        existente.setNivelAcesso("USER");
+
         return usuarioRepository.save(existente);
     }
 
-    // exclusão física
-    public void delete(Integer id) {
-        Usuario u = findById(id);
-        usuarioRepository.delete(u);
+    // Excluir usuário (remoção física)
+    public void delete(Long id) {
+        Usuario usuario = findById(id);
+        usuarioRepository.delete(usuario);
     }
 
-    // desativar (soft) -> set statusUsuario = "INATIVO"
-    public Usuario desativar(Integer id) {
-        Usuario u = findById(id);
-        u.setStatusUsuario("INATIVO");
-        return usuarioRepository.save(u);
+    // Desativar usuário (soft delete)
+    public Usuario desativar(Long id) {
+        Usuario usuario = findById(id);
+        usuario.setStatusUsuario("INATIVO");
+        return usuarioRepository.save(usuario);
     }
 
-    // login simples (email + senha)
+    // Login simples (email + senha)
     public Usuario login(String email, String senha) {
-        Usuario u = usuarioRepository.findByEmailAndSenha(email, senha);
-        if (u == null) {
-            throw new RuntimeException("Credenciais inválidas");
-        }
-        return u;
+        Optional<Usuario> usuarioOpt = Optional.ofNullable(usuarioRepository.findByEmailAndSenha(email, senha));
+        return usuarioOpt.orElseThrow(() -> new RuntimeException("Credenciais inválidas"));
     }
 }
